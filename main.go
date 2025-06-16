@@ -1,6 +1,7 @@
 package main
 
 import (
+	"Sketchbook/commands"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"github.com/joho/godotenv"
@@ -25,6 +26,8 @@ func main() {
 		log.Fatal("Unable to create discord session: ", err)
 	}
 
+	Sketchbook.AddHandler(commands.OnInteractionCreate)
+
 	err = Sketchbook.Open()
 	if err != nil {
 		log.Fatal("Unable to connect discord: ", err)
@@ -32,6 +35,14 @@ func main() {
 	defer Sketchbook.Close()
 
 	fmt.Println("Bot is now running. Press CTRL-C to exit.")
+
+	_, err = Sketchbook.ApplicationCommandCreate(Sketchbook.State.User.ID, "", &discordgo.ApplicationCommand{
+		Name:        "ping",
+		Description: "Replies with pong.",
+	})
+	if err != nil {
+		log.Fatal("Unable to create application command: ", err)
+	}
 
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt)
