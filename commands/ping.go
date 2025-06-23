@@ -1,13 +1,17 @@
 package commands
 
-import "github.com/bwmarrin/discordgo"
+import (
+	"fmt"
+	"github.com/bwmarrin/discordgo"
+)
 
 func OnInteractionCreate(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	ping := s.HeartbeatLatency().Milliseconds()
 	if i.ApplicationCommandData().Name == "ping" {
 		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
 			Data: &discordgo.InteractionResponseData{
-				Content: "pong",
+				Content: fmt.Sprintf("🏓 Pong! %dms", ping),
 			},
 		})
 	}
