@@ -36,12 +36,22 @@ func main() {
 
 	fmt.Println("Bot is now running. Press CTRL-C to exit.")
 
-	_, err = Sketchbook.ApplicationCommandCreate(Sketchbook.State.User.ID, "", &discordgo.ApplicationCommand{
-		Name:        "ping",
-		Description: "Replies with pong.",
-	})
-	if err != nil {
-		log.Fatal("Unable to create application command: ", err)
+	command := []*discordgo.ApplicationCommand{
+		{
+			Name:        "ping",
+			Description: "Replies with pong.",
+		},
+		{
+			Name:        "lotto",
+			Description: "Challenge your luck.",
+		},
+	}
+
+	for _, cmd := range command {
+		_, err = Sketchbook.ApplicationCommandCreate(Sketchbook.State.User.ID, "", cmd)
+		if err != nil {
+			log.Fatal("Unable to create application command: ", err)
+		}
 	}
 
 	stop := make(chan os.Signal, 1)
