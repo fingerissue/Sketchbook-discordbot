@@ -16,12 +16,12 @@ func main() {
 		log.Fatal(err)
 	}
 
-	DISCORD_BOT_TOKEN := os.Getenv("DISCORD_BOT_TOKEN")
-	if DISCORD_BOT_TOKEN == "" {
+	DiscordBotToken := os.Getenv("DISCORD_BOT_TOKEN")
+	if DiscordBotToken == "" {
 		log.Fatal("You need to set DISCORD_BOT_TOKEN")
 	}
 
-	Sketchbook, err := discordgo.New("Bot " + DISCORD_BOT_TOKEN)
+	Sketchbook, err := discordgo.New("Bot " + DiscordBotToken)
 	if err != nil {
 		log.Fatal("Unable to create discord session: ", err)
 	}
