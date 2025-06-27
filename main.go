@@ -32,7 +32,11 @@ func main() {
 	if err != nil {
 		log.Fatal("Unable to connect discord: ", err)
 	}
-	defer Sketchbook.Close()
+	defer func() {
+		if err := Sketchbook.Close(); err != nil {
+			log.Fatal("Unable to close discord session: ", err)
+		}
+	}()
 
 	fmt.Println("Bot is now running. Press CTRL-C to exit.")
 
