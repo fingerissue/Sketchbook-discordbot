@@ -48,6 +48,18 @@ func main() {
 		{
 			Name:        "lotto",
 			Description: "Challenge your luck.",
+			Options: []*discordgo.ApplicationCommandOption{
+				{
+					Name:        "mode",
+					Description: "수동/자동",
+					Type:        discordgo.ApplicationCommandOptionString,
+					Required:    true,
+					Choices: []*discordgo.ApplicationCommandOptionChoice{
+						{Name: "수동", Value: "수동"},
+						{Name: "자동", Value: "자동"},
+					},
+				},
+			},
 		},
 	}
 
