@@ -19,11 +19,8 @@ func replyErrorInteraction(s *discordgo.Session, i *discordgo.InteractionCreate,
 }
 
 func replyErrorFollowup(s *discordgo.Session, i *discordgo.InteractionCreate, msg string) {
-	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			Content: msg,
-		},
+	_, err := s.FollowupMessageCreate(i.Interaction, true, &discordgo.WebhookParams{
+		Content: msg,
 	})
 
 	if err != nil {
