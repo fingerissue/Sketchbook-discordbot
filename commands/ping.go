@@ -17,7 +17,7 @@ func handlePing(s *discordgo.Session, i *discordgo.InteractionCreate) {
 
 	if err != nil {
 		log.Println("Failed to respond to ping: ", err)
-		replyError(s, i)
+		replyError(s, i, "⚠️ 응답 중 오류가 발생했습니다.")
 		return
 	}
 }

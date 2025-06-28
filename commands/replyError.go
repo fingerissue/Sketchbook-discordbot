@@ -5,9 +5,9 @@ import (
 	"log"
 )
 
-func replyError(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func replyError(s *discordgo.Session, i *discordgo.InteractionCreate, msg string) {
 	_, err := s.FollowupMessageCreate(i.Interaction, true, &discordgo.WebhookParams{
-		Content: "⚠️ 응답 중 오류가 발생했습니다.",
+		Content: msg,
 	})
 
 	if err != nil {
