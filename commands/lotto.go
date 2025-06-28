@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"log"
+	"math/rand"
 	"strconv"
 	"strings"
 )
@@ -54,6 +55,26 @@ func handleLotto(s *discordgo.Session, i *discordgo.InteractionCreate) {
 
 			inputNumbers[index] = n
 		}
+	} else if mode == "자동" {
+		count := 0
+		for count < 6 {
+			jungbok := false
+			n := rand.Intn(45) + 1
+			for j := 0; j < count; j++ {
+				if n == inputNumbers[j] {
+					jungbok = true
+					break
+				}
+			}
+			if jungbok {
+				continue
+			}
+			inputNumbers[count] = n
+			count++
+		}
+	} else {
+		replyErrorInteraction(s, i, "⚠️ 수동/자동 중 하나를 선택하세요.")
+		return
 	}
 
 	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
