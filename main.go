@@ -51,13 +51,19 @@ func main() {
 			Options: []*discordgo.ApplicationCommandOption{
 				{
 					Name:        "mode",
-					Description: "수동/자동",
+					Description: "수동/자동을 선택하세요.",
 					Type:        discordgo.ApplicationCommandOptionString,
 					Required:    true,
 					Choices: []*discordgo.ApplicationCommandOptionChoice{
 						{Name: "수동", Value: "수동"},
 						{Name: "자동", Value: "자동"},
 					},
+				},
+				{
+					Name:        "numbers",
+					Description: "1부터 45까지 중 6개의 정수를 중복없이 공백으로 구분하여 입력하세요.",
+					Type:        discordgo.ApplicationCommandOptionString,
+					Required:    false,
 				},
 			},
 		},
