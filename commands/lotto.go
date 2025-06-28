@@ -10,11 +10,16 @@ import (
 )
 
 func handleLotto(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	var (
+		mode, numbers string
+		inputNumbers  [6]int
+		outputNumbers [7]int
+	)
+	var (
+		rank, rankColor    int
+		rankmsg, rankEmoji string
+	)
 	Options := i.ApplicationCommandData().Options
-	var mode string
-	var numbers string
-	inputNumbers := [6]int{}
-	outputNumbers := [7]int{}
 
 	for _, option := range Options {
 		if option.Name == "mode" {
@@ -85,13 +90,13 @@ func handleLotto(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		return
 	}
 
-	count := 0
-	for count < 7 {
+	output := 0
+	for output < 7 {
 		jungbok := false
 		n := rand.Intn(45) + 1
 
-		for j := 0; j < count; j++ {
-			if n == outputNumbers[j] {
+		for i := 0; i < output; i++ {
+			if n == outputNumbers[i] {
 				jungbok = true
 				break
 			}
@@ -100,14 +105,81 @@ func handleLotto(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			continue
 		}
 
-		outputNumbers[count] = n
-		count++
+		outputNumbers[output] = n
+		output++
+	}
+
+	matchCount := 0
+	for _, user := range inputNumbers {
+		for i := 0; i < 6; i++ {
+			if user == outputNumbers[i] {
+				matchCount++
+				break
+			}
+		}
+	}
+
+	switch matchCount {
+	case 6:
+		rank = 1
+		rankEmoji = "🎉"
+		rankColor = 0xFFD700
+	case 5:
+		rank = 3
+		rankEmoji = "🥉"
+		rankColor = 0xCD7F32
+
+		for _, user := range inputNumbers {
+			if user == outputNumbers[6] {
+				rank = 2
+				rankEmoji = "🥈"
+				rankColor = 0xC0C0C0
+				break
+			}
+		}
+	case 4:
+		rank = 4
+		rankEmoji = "🏅"
+		rankColor = 0x3498DB
+	case 3:
+		rank = 5
+		rankEmoji = "🎊"
+		rankColor = 0x2ECC40
+	default:
+		rank = -1
+		rankEmoji = "💔"
+		rankColor = 0xE74C3C
+	}
+
+	if rank == 2 {
+		rankmsg = fmt.Sprintf("%d등 당첨! (%d개 + 보너스)", rank, matchCount)
+	} else if rank == -1 {
+		rankmsg = fmt.Sprintf("꽝! 이 정도면 번호가 님 피하는 거 ㅇㅈ?")
+	} else {
+		rankmsg = fmt.Sprintf("%d등 당첨! (%d개)", rank, matchCount)
 	}
 
 	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Content: fmt.Sprintf("🎫 lotto 명령어: %s\n%d %d %d %d %d %d", mode, inputNumbers[0], inputNumbers[1], inputNumbers[2], inputNumbers[3], inputNumbers[4], inputNumbers[5]),
+			Embeds: []*discordgo.MessageEmbed{
+				{
+					Type:        discordgo.EmbedTypeRich,
+					Title:       fmt.Sprintf("%s 로또 결과", rankEmoji),
+					Description: rankmsg,
+					Color:       rankColor,
+					Fields: []*discordgo.MessageEmbedField{
+						{
+							Name:  "사용자 번호",
+							Value: strings.Trim(fmt.Sprint(inputNumbers), "[]"),
+						},
+						{
+							Name:  "당첨 번호",
+							Value: fmt.Sprintf("%s + %d", strings.Trim(fmt.Sprint(outputNumbers[:6]), "[]"), outputNumbers[6]),
+						},
+					},
+				},
+			},
 		},
 	})
 
