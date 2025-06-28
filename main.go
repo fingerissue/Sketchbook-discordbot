@@ -38,8 +38,6 @@ func main() {
 		}
 	}()
 
-	fmt.Println("Bot is now running. Press CTRL-C to exit.")
-
 	command := []*discordgo.ApplicationCommand{
 		{
 			Name:        "ping",
@@ -75,6 +73,8 @@ func main() {
 			log.Fatal("Unable to create application command: ", err)
 		}
 	}
+
+	fmt.Println("Bot is now running. Press CTRL-C to exit.")
 
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt)
