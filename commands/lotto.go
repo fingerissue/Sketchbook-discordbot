@@ -14,6 +14,7 @@ func handleLotto(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	var mode string
 	var numbers string
 	inputNumbers := [6]int{}
+	outputNumbers := [7]int{}
 
 	for _, option := range Options {
 		if option.Name == "mode" {
@@ -82,6 +83,25 @@ func handleLotto(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	} else {
 		replyErrorInteraction(s, i, "⚠️ 수동/자동 중 하나를 선택하세요.")
 		return
+	}
+
+	count := 0
+	for count < 7 {
+		jungbok := false
+		n := rand.Intn(45) + 1
+
+		for j := 0; j < count; j++ {
+			if n == outputNumbers[j] {
+				jungbok = true
+				break
+			}
+		}
+		if jungbok {
+			continue
+		}
+
+		outputNumbers[count] = n
+		count++
 	}
 
 	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
