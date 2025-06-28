@@ -80,7 +80,7 @@ func handleLotto(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Content: fmt.Sprintf("🎫 lotto 명령어: %s", mode),
+			Content: fmt.Sprintf("🎫 lotto 명령어: %s\n%d %d %d %d %d %d", mode, inputNumbers[0], inputNumbers[1], inputNumbers[2], inputNumbers[3], inputNumbers[4], inputNumbers[5]),
 		},
 	})
 
