@@ -56,10 +56,16 @@ func handleLotto(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			inputNumbers[index] = n
 		}
 	} else if mode == "자동" {
+		if numbers != "" {
+			replyErrorInteraction(s, i, "⚠️ 자동모드에서는 숫자를 입력할 수 없습니다.")
+			return
+		}
+
 		count := 0
 		for count < 6 {
 			jungbok := false
 			n := rand.Intn(45) + 1
+
 			for j := 0; j < count; j++ {
 				if n == inputNumbers[j] {
 					jungbok = true
@@ -69,6 +75,7 @@ func handleLotto(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			if jungbok {
 				continue
 			}
+
 			inputNumbers[count] = n
 			count++
 		}
