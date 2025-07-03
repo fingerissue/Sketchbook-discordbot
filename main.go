@@ -107,6 +107,8 @@ func main() {
 		}
 	}()
 
+	commands.DB = DB
+
 	fmt.Println("Bot is now running. Press CTRL-C to exit.")
 
 	stop := make(chan os.Signal, 1)
