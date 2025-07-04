@@ -215,6 +215,14 @@ func handleLotto(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		rankmsg = fmt.Sprintf("%d등 당첨! (%d개)", rank, matchCount)
 	}
 
+	var money int64
+	err = DB.QueryRow("select money from user where user_id = ?", userID).Scan(&money)
+	if err != nil {
+		replyErrorInteraction(s, i, "⚠️ 현재 잔액을 확인할 수 없습니다.")
+		log.Println(err)
+		return
+	}
+
 	err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
@@ -232,6 +240,10 @@ func handleLotto(s *discordgo.Session, i *discordgo.InteractionCreate) {
 						{
 							Name:  "당첨 번호",
 							Value: fmt.Sprintf("%s + %d", strings.Trim(fmt.Sprint(outputNumbers[:6]), "[]"), outputNumbers[6]),
+						},
+						{
+							Name:  "현재 금액",
+							Value: fmt.Sprintf("%d원", money),
 						},
 					},
 				},
