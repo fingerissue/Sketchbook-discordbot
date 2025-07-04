@@ -93,7 +93,19 @@ func handleLotto(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	userID := s.State.User.ID
 	exists := false
 
-	err := DB.QueryRow("select exists(select 1 from user where user_id = ?)", userID).Scan(&exists)
+	tx, err := DB.Begin()
+	if err != nil {
+		replyErrorInteraction(s, i, "⚠️ SQL문을 실행하는 중 오류가 발생했습니다.")
+		log.Fatal(err)
+		return
+	}
+	defer func() {
+		if err := tx.Rollback(); err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	err = tx.QueryRow("select exists(select 1 from user where user_id = ?)", userID).Scan(&exists)
 	if err != nil {
 		replyErrorInteraction(s, i, "⚠️ SQL문을 실행하는 중 오류가 발생했습니다.")
 		log.Println(err)
@@ -101,7 +113,7 @@ func handleLotto(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	}
 
 	if !exists {
-		_, err := DB.Exec("insert into user(user_id, money) values(?, 0)", userID)
+		_, err := tx.Exec("insert into user(user_id, money) values(?, 0)", userID)
 		if err != nil {
 			replyErrorInteraction(s, i, "⚠️ SQL문을 실행하는 중 오류가 발생했습니다.")
 			log.Println(err)
@@ -109,7 +121,7 @@ func handleLotto(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		}
 	}
 
-	_, err = DB.Exec("update user set money = money - 1000 where user_id = ?", userID)
+	_, err = tx.Exec("update user set money = money - 1000 where user_id = ?", userID)
 	if err != nil {
 		replyErrorInteraction(s, i, "⚠️ 정상적으로 로또를 구매하지 못했습니다.")
 		log.Println(err)
@@ -150,7 +162,7 @@ func handleLotto(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		rank = 1
 		rankEmoji = "🎉"
 		rankColor = 0xFFD700
-		_, err = DB.Exec("update user set money = money + 3750000000 where user_id = ?", userID)
+		_, err = tx.Exec("update user set money = money + 3750000000 where user_id = ?", userID)
 		if err != nil {
 			replyErrorInteraction(s, i, "⚠️ 당청금을 수령하는데 문제가 발생했습니다.")
 			log.Println(err)
@@ -160,7 +172,7 @@ func handleLotto(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		rank = 3
 		rankEmoji = "🥉"
 		rankColor = 0xCD7F32
-		_, err = DB.Exec("update user set money = money + 25000000 where user_id = ?", userID)
+		_, err = tx.Exec("update user set money = money + 25000000 where user_id = ?", userID)
 		if err != nil {
 			replyErrorInteraction(s, i, "⚠️ 당청금을 수령하는데 문제가 발생했습니다.")
 			log.Println(err)
@@ -172,7 +184,7 @@ func handleLotto(s *discordgo.Session, i *discordgo.InteractionCreate) {
 				rank = 2
 				rankEmoji = "🥈"
 				rankColor = 0xC0C0C0
-				_, err = DB.Exec("update user set money = money + 250000000 where user_id = ?", userID)
+				_, err = tx.Exec("update user set money = money + 250000000 where user_id = ?", userID)
 				if err != nil {
 					replyErrorInteraction(s, i, "⚠️ 당청금을 수령하는데 문제가 발생했습니다.")
 					log.Println(err)
@@ -185,7 +197,7 @@ func handleLotto(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		rank = 4
 		rankEmoji = "🏅"
 		rankColor = 0x3498DB
-		_, err = DB.Exec("update user set money = money + 50000 where user_id = ?", userID)
+		_, err = tx.Exec("update user set money = money + 50000 where user_id = ?", userID)
 		if err != nil {
 			replyErrorInteraction(s, i, "⚠️ 당청금을 수령하는데 문제가 발생했습니다.")
 			log.Println(err)
@@ -195,7 +207,7 @@ func handleLotto(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		rank = 5
 		rankEmoji = "🎊"
 		rankColor = 0x2ECC40
-		_, err = DB.Exec("update user set money = money + 5000 where user_id = ?", userID)
+		_, err = tx.Exec("update user set money = money + 5000 where user_id = ?", userID)
 		if err != nil {
 			replyErrorInteraction(s, i, "⚠️ 당청금을 수령하는데 문제가 발생했습니다.")
 			log.Println(err)
@@ -216,10 +228,15 @@ func handleLotto(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	}
 
 	var money int64
-	err = DB.QueryRow("select money from user where user_id = ?", userID).Scan(&money)
+	err = tx.QueryRow("select money from user where user_id = ?", userID).Scan(&money)
 	if err != nil {
 		replyErrorInteraction(s, i, "⚠️ 현재 잔액을 확인할 수 없습니다.")
 		log.Println(err)
+		return
+	}
+
+	if err = tx.Commit(); err != nil {
+		log.Fatal(err)
 		return
 	}
 
