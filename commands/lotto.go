@@ -90,6 +90,25 @@ func handleLotto(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		return
 	}
 
+	userID := s.State.User.ID
+	exists := false
+
+	err := DB.QueryRow("select exists(select 1 from user where user_id = ?)", userID).Scan(&exists)
+	if err != nil {
+		replyErrorInteraction(s, i, "⚠️ SQL문을 실행하는 중 오류가 발생했습니다.")
+		log.Println(err)
+		return
+	}
+
+	if !exists {
+		_, err := DB.Exec("insert into user(user_id, money) values(?, 0)", userID)
+		if err != nil {
+			replyErrorInteraction(s, i, "⚠️ SQL문을 실행하는 중 오류가 발생했습니다.")
+			log.Println(err)
+			return
+		}
+	}
+
 	output := 0
 	for output < 7 {
 		jungbok := false
@@ -159,7 +178,7 @@ func handleLotto(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		rankmsg = fmt.Sprintf("%d등 당첨! (%d개)", rank, matchCount)
 	}
 
-	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+	err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
 			Embeds: []*discordgo.MessageEmbed{
