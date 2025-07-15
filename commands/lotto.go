@@ -99,9 +99,13 @@ func handleLotto(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		log.Fatal(err)
 		return
 	}
+
+	committed := false
 	defer func() {
-		if err := tx.Rollback(); err != nil {
-			log.Fatal(err)
+		if !committed {
+			if err := tx.Rollback(); err != nil {
+				log.Fatal(err)
+			}
 		}
 	}()
 
@@ -239,6 +243,7 @@ func handleLotto(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		log.Fatal(err)
 		return
 	}
+	committed = true
 
 	err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
